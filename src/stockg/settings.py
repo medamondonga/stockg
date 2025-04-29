@@ -127,4 +127,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 """
  Thinks i've had
 """
-AUTH_USER_MODEL = 'accounts.User'
+ACCOUNTS_USER_MODEL = 'accounts.User'

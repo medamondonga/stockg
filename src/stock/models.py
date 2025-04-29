@@ -1,3 +1,180 @@
+"""
+stock models
+"""
+import random
+import string
 from django.db import models
+from django.conf import settings
 
-# Create your models here.
+
+CHOICES_ETAT_BOUTIQUE=[
+    ("open", "Open"),
+    ("closed", "Closed"),
+]
+CHOICES_SEXE=[
+    ("homme", "homme"),
+    ("femme", "femme"),
+]
+CHOICES_TYPE = [
+    ("chaussures", "Chaussures"),
+    ("vetements", "Vetements"),
+    ("sacs", "Sacs"),
+    ("autre", "Autre")
+]
+CHOICES_TRANSFERT = [
+    ("pending", "En cours"),
+    ("done", "Terminé"),
+    ("canceled", "Annulé")
+]
+
+class Boutique(models.Model):
+    """
+    Store class
+    """
+    proprietaire = models.ForeignKey(settings.ACCOUNTS_USER_MODEL, on_delete=models.CASCADE)
+    nom_boutique = models.CharField(max_length=250)
+    adresse = models.TextField()
+    date_cretation = models.DateTimeField(auto_now_add=True)
+    etat = models.CharField(max_length=100, choices=CHOICES_ETAT_BOUTIQUE, default="open")
+
+    def __str__(self):
+        return f"{self.nom_boutique}"
+    
+class PointDeVente(models.Model):
+    """
+    Point de vente classe
+    """
+    boutique = models.ForeignKey(Boutique, on_delete=models.CASCADE)
+    nom_point_de_vente = models.CharField(max_length=250)
+    adresse = models.TextField()
+    telephone = models.CharField(max_length=20)
+    gerant = models.ForeignKey(settings.ACCOUNTS_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, related_name="gerant")
+    vendeur = models.ForeignKey(settings.ACCOUNTS_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, related_name="vendeur")
+
+    def __str__(self):
+        return f"{self.nom_point_de_vente}"
+    
+class Client(models.Model):
+    """
+    Class of client
+    """
+    nom_client = models.CharField(max_length=255)
+    prenom_client = models.CharField(max_length=255)
+    sexe = models.CharField(max_length=20, choices=CHOICES_SEXE, null=True, blank=True)
+    telephone = models.CharField(max_length=20, null=True, blank=True)
+    adresse = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.nom_client} {self.prenom_client}"
+    
+class Categorie(models.Model):
+    """
+    categorie models
+    """
+    nom_categorie = models.CharField(max_length=255, null=True, blank=True)
+    type_categorie = models.CharField(max_length=255, choices=CHOICES_TYPE, default="autre")
+    
+    def get_taille(self):
+        """
+        to retrieve the sizes
+        """
+        if self.type_categorie == 'chaussures':
+            return ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31', '32', '33', '34', '35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46', '47', '48', '49', '50']
+        elif self.type_categorie == "vetements":
+            return ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', '4XL', '5XL', '6XL', '7XL', '8XL']
+        elif self.type_categorie == "sacs":
+            return ['Petit', 'Moyen', 'Grand','Compact', 'Standard', 'Sport']
+        else:
+            return "Autre"
+    
+    def __str__(self):
+        return f"{self.nom_categorie} {self.type_categorie}"
+
+class Article(models.Model):
+    """
+    Class of Article
+    """
+    nom_article = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+    prix_achat_unitaire = models.DecimalField(max_digits=10,decimal_places=2)
+    prix_vente_unitaire = models.DecimalField(max_digits=10, decimal_places=2)
+    quantite_en_stock = models.IntegerField()
+    Categorie = models.ForeignKey(Categorie, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.nom_article}"
+    
+
+class Vente(models.Model):
+    date_vente = models.DateField(auto_now_add=True)
+    client = models.ForeignKey(Client, on_delete=models.CASCADE)
+    prix_total_vente = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    vendeur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.date_vente} - {self.prix_total_vente} - {self.client}"
+
+class VenteItem(models.Model):
+    """
+    Vente item class
+    """
+    vente = models.ForeignKey(Vente, on_delete=models.CASCADE, related_name='vente_items')
+    article = models.ForeignKey(Article, on_delete=models.CASCADE)
+    quantite = models.IntegerField()
+    prix_unitaire_recu = models.DecimalField(max_digits=10, decimal_places=2)
+    remise = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    perte = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+
+class Facture(models.Model):
+    """
+    Model of facture
+    """
+    date = models.DateField(auto_now_add=True)
+    montant_HT = models.DecimalField(max_digits=10, decimal_places=2)
+    montant_TTC = models.DecimalField(max_digits=10, decimal_places=2)
+    vente = models.ForeignKey(Vente, on_delete=models.CASCADE)
+
+class Transfert(models.Model):
+    """
+    Model of transfert
+    """
+    date_transfert = models.DateTimeField(auto_now_add=True)
+    point_source = models.ForeignKey(PointDeVente, on_delete=models.CASCADE, related_name='transferts_sortants')
+    point_destination = models.ForeignKey(PointDeVente, on_delete=models.CASCADE, related_name='transferts_entrants')
+    code = models.CharField(max_length=20, unique=True, blank=True)
+    statut_transfert = models.CharField(max_length=50, choices=CHOICES_TRANSFERT, default="pending")
+
+    def save(self, *args, **kwargs):
+        if not self.code:
+            self.code = 'TRF'+''.join(random.choices(string.digits, k=7))
+            super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.date_transfert} - {self.point_source} - {self.point_destination} - {self.statut_transfert}"
+    
+class TransferItem(models.Model):
+    """
+    Model of tranfert items
+    """
+    transfert = models.ForeignKey(Transfert, on_delete=models.CASCADE, related_name='items')
+    article = models.ForeignKey(Article, on_delete=models.CASCADE)
+    quantite = models.IntegerField()
+
+class Depense(models.Model):
+    """
+    Depense models
+    """
+    point_de_vente = models.ForeignKey(PointDeVente, on_delete=models.CASCADE)
+    motif_depense = models.CharField(max_length=100)
+    montant = models.DecimalField(max_digits=10, decimal_places=2)
+
+"""
+class Rapport(models.Model):
+    type_rapport = models.CharField(max_length=50)
+    date_debut = models.DateField()
+    date_fin = models.DateField()
+    total_vente = models.DecimalField(max_digits=10, decimal_places=2)
+    total_depense = models.DecimalField(max_digits=10, decimal_places=2)
+    total_remise = models.DecimalField(max_digits=10, decimal_places=2)
+    perte = models.DecimalField(max_digits=10, decimal_places=2)
+"""

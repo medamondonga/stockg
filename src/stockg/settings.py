@@ -42,6 +42,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -127,4 +128,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 """
  Thinks i've had
 """
-ACCOUNTS_USER_MODEL = 'accounts.User'
+AUTH_USER_MODEL = 'auth.User'
+REST_USE_JWT = True
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+

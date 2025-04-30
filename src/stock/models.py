@@ -48,7 +48,7 @@ class Boutique(models.Model):
     """
     Store class
     """
-    proprietaire = models.ForeignKey(settings.ACCOUNTS_USER_MODEL, on_delete=models.CASCADE)
+    proprietaire = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     nom_boutique = models.CharField(max_length=250)
     adresse = models.TextField()
     date_cretation = models.DateTimeField(auto_now_add=True)
@@ -65,8 +65,8 @@ class PointDeVente(models.Model):
     nom_point_de_vente = models.CharField(max_length=250)
     adresse = models.TextField()
     telephone = models.CharField(max_length=20)
-    gerant = models.ForeignKey(settings.ACCOUNTS_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, related_name="gerant")
-    vendeur = models.ForeignKey(settings.ACCOUNTS_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, related_name="vendeur")
+    gerant = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, related_name="gerant")
+    vendeur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, related_name="vendeur")
 
     def __str__(self):
         return f"{self.nom_point_de_vente}"

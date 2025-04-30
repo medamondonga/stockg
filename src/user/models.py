@@ -20,7 +20,7 @@ class Invitation(models.Model):
     """
     the invitation class
     """
-    email_invite = models.ForeignKey(settings.ACCOUNTS_USER_MODEL, on_delete=models.CASCADE)    
+    email_invite = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)    
     date_envoi = models.DateTimeField(auto_now_add=True)
     date_expiration = models.DateTimeField()
     statut = models.CharField(max_length=50, choices=STATUT_CHOICES_INVITATIONS, default="sent")
@@ -44,7 +44,7 @@ class Abonnement(models.Model):
     """
     the abonnement class
     """
-    user = models.ForeignKey(settings.ACCOUNTS_USER_MODEL, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     offre = models.ForeignKey(Offre, on_delete=models.CASCADE)
     date_debut = models.DateTimeField(auto_now_add=True)
     date_fin = models.DateTimeField(null=True, blank=True)

@@ -26,6 +26,23 @@ CHOICES_TRANSFERT = [
     ("done", "Terminé"),
     ("canceled", "Annulé")
 ]
+CHOICES_COULEUR = [
+    ('noir', 'noir'),
+    ('blanc', 'blanc'),
+    ('gris', 'gris'),
+    ('bleu', 'bleu'),
+    ('rouge', 'rouge'),
+    ('vert', 'vert'),
+    ('jaune', 'jaune'),
+    ('rose', 'rose'),
+    ('orange', 'orange'),
+    ('violet', 'violet'),
+    ('marron', 'marron'),
+    ('beige', 'beige'),
+    ('turquoise', 'turquoise'),
+    ('bordeaux', 'bordeaux'),
+    ('or', 'or')
+]
 
 class Boutique(models.Model):
     """
@@ -99,6 +116,7 @@ class Article(models.Model):
     prix_achat_unitaire = models.DecimalField(max_digits=10,decimal_places=2)
     prix_vente_unitaire = models.DecimalField(max_digits=10, decimal_places=2)
     quantite_en_stock = models.IntegerField()
+    couleur = models.CharField(max_length=255, choices=CHOICES_COULEUR, null=True)
     Categorie = models.ForeignKey(Categorie, on_delete=models.CASCADE)
 
     def __str__(self):

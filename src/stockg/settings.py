@@ -128,7 +128,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 """
  Thinks i've had
 """
-AUTH_USER_MODEL = 'auth.User'
+AUTH_USER_MODEL = 'accounts.User'
 REST_USE_JWT = True
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 CORS_ALLOW_ALL_ORIGINS = True

@@ -1,8 +1,10 @@
 """
 here i create my accounts models
 """
-from django.contrib.auth.models import AbstractUser, Group, Permission
+from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.contrib.auth.hashers import check_password
+
 
 class User(AbstractUser):
     """
@@ -14,15 +16,9 @@ class User(AbstractUser):
         ('manager', 'Manager'),
     ]
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='owner')
-    groups = models.ManyToManyField(
-        Group,
-        related_name='accounts_user_groups',  # Nom unique
-        blank=True
-    )
-    user_permissions = models.ManyToManyField(
-        Permission,
-        related_name='accounts_user_permissions',  # Nom unique
-        blank=True
-    )
+    
+    def check_password(self, raw_password):
+        return check_password(raw_password, self.password)
+    
     def __str__(self):
-        return f"{self.username}"
+        return f"{self.email}"

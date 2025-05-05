@@ -15,10 +15,13 @@ class User(AbstractUser):
         ('seller', 'Seller'),
         ('manager', 'Manager'),
     ]
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='owner')
-    
+    role = models.CharField(max_length=20,
+                            choices=ROLE_CHOICES,
+                            default='owner')
+
     def check_password(self, raw_password):
         return check_password(raw_password, self.password)
     
     def __str__(self):
         return f"{self.email}"
+     

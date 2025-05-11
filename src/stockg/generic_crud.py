@@ -7,8 +7,6 @@ from rest_framework.mixins import (ListModelMixin, CreateModelMixin,
                                    UpdateModelMixin, RetrieveModelMixin,
                                    DestroyModelMixin)
 from rest_framework.generics import GenericAPIView
-from .models import Article, Boutique, PointDeVente
-from .serializers import ArticleSerializer, BoutiqueSerializer, PointDeVenteSerializer
 
 CREATED = "Création reussi"
 DELETED = "Suppression reussi"

@@ -185,14 +185,3 @@ class Depense(models.Model):
     point_de_vente = models.ForeignKey(PointDeVente, on_delete=models.CASCADE)
     motif_depense = models.CharField(max_length=100)
     montant = models.DecimalField(max_digits=10, decimal_places=2)
-
-"""
-class Rapport(models.Model):
-    type_rapport = models.CharField(max_length=50)
-    date_debut = models.DateField()
-    date_fin = models.DateField()
-    total_vente = models.DecimalField(max_digits=10, decimal_places=2)
-    total_depense = models.DecimalField(max_digits=10, decimal_places=2)
-    total_remise = models.DecimalField(max_digits=10, decimal_places=2)
-    perte = models.DecimalField(max_digits=10, decimal_places=2)
-"""

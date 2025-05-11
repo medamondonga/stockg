@@ -1,8 +1,12 @@
+"""
+"""
 from django.urls import path
 from .views import home
-from .mixins import SignUpView
-
+from .mixins import create_custom
+from .models import User
+from .serializers import UserSerializer
 urlpatterns = [
     path("home/", home, name="home_accounts"),
-    path("create/", SignUpView.as_view(), name="sign_up",)
+    path("signup2/", create_custom(User, UserSerializer).as_view(), name="Creer user2"),
+
 ]

@@ -15,9 +15,16 @@ class User(AbstractUser):
         ('seller', 'Seller'),
         ('manager', 'Manager'),
     ]
+    SEXE = [
+        ("homme", "Homme"),
+        ("femme", "Femme")
+    ]
     role = models.CharField(max_length=20,
                             choices=ROLE_CHOICES,
                             default='owner')
+    sexe = models.CharField(max_length=10, choices=SEXE,
+                            null=False, blank=False, default='Unknown')
+
 
     def check_password(self, raw_password):
         return check_password(raw_password, self.password)

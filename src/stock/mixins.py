@@ -14,213 +14,117 @@ CREATED = "Création reussi"
 DELETED = "Suppression reussi"
 MODIFIED = "Modification reussi"
 
-#Views for Store
-class CreateBoutique(CreateModelMixin, GenericAPIView):
-    """
-    Create a new store
-    """
-    queryset = Boutique.objects.all()
-    serializer_class = BoutiqueSerializer
+#Function for generic CRUD
 
-    def post(self, request, *args, **kwargs):
+def create_customized(model, serializer):
+    """
+    This function get a model and a serializer class and return the objet created
+    """
+    class CustomCreateView(CreateModelMixin, GenericAPIView):
         """
-        post a new store
+        Create something
         """
-        response = self.create(request, *args, **kwargs)
+        queryset = model.objects.all()
+        serializer_class = serializer
 
-        if response.status_code == status.HTTP_201_CREATED:
-            return Response({
-                "message": f"{CREATED}"
-            }, status=status.HTTP_201_CREATED)
-        return response
+        def post(self, request, *args,**kwargs):
+            """
+            post something
+            """
+            response = self.create(request, *args, **kwargs)
 
-class ListBoutique(ListModelMixin, GenericAPIView):
+            if response.status_code == status.HTTP_201_CREATED:
+                return Response({
+                    "message": f"{CREATED}"
+                }, status=status.HTTP_201_CREATED)
+            return response
+    return CustomCreateView
+
+def list_customized(model, serializer):
     """
-    List store
+    This function get a model and a serializer class and return list of objet
     """
-    queryset = Boutique.objects.all()
-    serializer_class = BoutiqueSerializer
-
-    def get(self, request, *args, **kwargs):
+    class ListCustomView(ListModelMixin, GenericAPIView):
         """
-        get all stores
+        List something
         """
-        return self.list(request, *args, **kwargs)
+        queryset = model.objects.all()
+        serializer_class = serializer
 
-class DetailBoutique(RetrieveModelMixin, GenericAPIView):
-    """
-    Detail of boutique
-    """
-    queryset = Boutique.objects.all()
-    serializer_class = BoutiqueSerializer
+        def get(self, request, *args, **kwargs):
+            """
+            get all things
+            """
+            return self.list(request, *args, **kwargs)
+    return ListCustomView
 
-    def get(self, request, *args, **kwargs):
+def detail_update_delete_customized(model, serializer):
+    """
+    This function get a model and a serializer class and return detail, update and delete object
+    """
+    class DetailCustomView(RetrieveModelMixin, GenericAPIView):
         """
-        Get one store
+        Detail of somthing
         """
-        if kwargs.get('pk'):
-            return self.retrieve(request, *args, **kwargs)
-        return self.list(request, *args, **kwargs) 
+        queryset = model.objects.all()
+        serializer_class = serializer
 
-class UpdateBoutique(UpdateModelMixin, GenericAPIView):
-    """
-    Update one store
-    """
-    queryset = Boutique.objects.all()  
-    serializer_class = BoutiqueSerializer
-
-    def put(self, request, *args, **kwargs):
+        def get(self, request, *args, **kwargs):
+            """
+            Get one thing
+            """
+            if kwargs.get('pk'):
+                return self.retrieve(request, *args, **kwargs)
+    class UpdateCustomView(UpdateModelMixin, GenericAPIView):
         """
-        update all files of store's database
+        Update something
         """
-        response = self.update(request, *args, **kwargs)
-        if response.status_code == status.HTTP_200_OK:
-            return Response({
-                "message":f"{MODIFIED}"
-            }, status=status.HTTP_200_OK)
-        return response
+        queryset = model.objects.all()  
+        serializer_class = serializer
 
-    def patch(self, request, *args, **kwargs):
+        def put(self, request, *args, **kwargs):
+            """
+            update all files of something's database
+            """
+            response = self.update(request, *args, **kwargs)
+            if response.status_code == status.HTTP_200_OK:
+                return Response({
+                    "message":f"{MODIFIED}"
+                }, status=status.HTTP_200_OK)
+            return response
+
+        def patch(self, request, *args, **kwargs):
+            """
+            Update just part of something's database
+            """
+            response = self.partial_update(request, *args, **kwargs)
+            if response.status_code == status.HTTP_200_OK:
+                return Response({
+                    "message": f"{MODIFIED}"
+                }, status=status.HTTP_200_OK)
+            return response
+    class DeleteCustomView(DestroyModelMixin, GenericAPIView):
         """
-        Update just part of store's database
+        Delete one thing
         """
-        response = self.partial_update(request, *args, **kwargs)
-        if response.status_code == status.HTTP_200_OK:
-            return Response({
-                "message": "Boutique modifié"
-            }, status=status.HTTP_200_OK)
-        return response
+        queryset = model.objects.all()
+        serializer_class = serializer
 
-class DeleteBoutique(DestroyModelMixin, GenericAPIView):
-    """
-    Delete one store
-    """
-    queryset = Boutique.objects.all()
-    serializer_class = BoutiqueSerializer
+        def delete(self, request, *args,**kwargs):
+            """
+            Delete a store in database
+            """
+            response = self.destroy(request, *args, **kwargs)
 
-    def delete(self, request, *args,**kwargs):
+            if response.status_code == status.HTTP_204_NO_CONTENT:
+                return Response({
+                    "message": f"{DELETED}"
+                }, status=status.HTTP_204_NO_CONTENT)
+            return response
+    class CombineActionView(UpdateCustomView,
+                     DetailCustomView,
+                     DeleteCustomView):
         """
-        Delete a store in database
+        all action
         """
-        response = self.destroy(request, *args, **kwargs)
-
-        if response.status_code == status.HTTP_204_NO_CONTENT:
-            return Response({
-                "message": f"{DELETED}"
-            }, status=status.HTTP_204_NO_CONTENT)
-        return response
-
-class BoutiqueAction(UpdateBoutique,
-                     DetailBoutique,
-                     DeleteBoutique):
-    """
-    A combine class of all action for store  
-    """
-
-
-#Views of points de vente
-class CreatePointDeVente(CreateModelMixin,GenericAPIView):
-    """
-    Create a new store site
-    """
-    queryset = PointDeVente.objects.all() # pylint: disable=no-member
-    serializer_class = PointDeVenteSerializer
-
-    def post(self, request, *args, **kwargs):
-        """
-        post a new store site
-        """
-        response = self.create(request, *args, **kwargs)
-
-        if response.status_code == status.HTTP_201_CREATED:
-            return Response({
-                "message": f"{CREATED}"
-            }, status=status.HTTP_201_CREATED)
-
-class ListPointVente(ListModelMixin, GenericAPIView):
-    """
-    List of store site
-    """
-    queryset = PointDeVente.objects.all()
-    serializer_class = PointDeVenteSerializer
-
-    def get(self, request, *args, **kwargs):
-        """
-        Get all store site
-        """
-        return self.list(request, *args, **kwargs)
-
-class DetailPointVente(RetrieveModelMixin, GenericAPIView):
-    """
-    Details of one store site
-    """
-    queryset=PointDeVente.objects.all()
-    serializer_class=PointDeVenteSerializer
-
-    def get(self, request, *args, **kwargs):
-        """
-        Get one store site
-        """
-        return self.retrieve(request, *args, **kwargs)
-    
-class UpdatePointVente(UpdateModelMixin, GenericAPIView):
-    """
-    Update store site
-    """
-    queryset = PointDeVente.objects.all()
-    serializer_class= PointDeVenteSerializer
-
-    def put(self, request, *args, **kwargs):
-        response = self.update(request, *args, **kwargs)
-
-        if response.status_code == status.HTTP_200_OK:
-            return Response({
-                "message": f"{MODIFIED}"
-            }, status=status.HTTP_200_OK)
-        return response
-    
-    def patch(self, request, *args, **kwargs):
-        response = self.partial_update(request, *args, **kwargs)
-
-        if response.status_code == status.HTTP_200_OK:
-            return Response({
-                "message": f"{MODIFIED}"
-            }, status=status.HTTP_200_OK)
-        return response
-
-class DeletePointVente(DestroyModelMixin, GenericAPIView):
-    """
-    Delete a store site
-    """
-    queryset=PointDeVente.objects.all()
-    serializer_class = PointDeVenteSerializer
-
-    def delete(self, request, *args, **kwargs):
-        """
-        Delete store site
-        """
-        response = self.destroy(request, *args, **kwargs)
-
-        if response.status_code == status.HTTP_204_NO_CONTENT:
-            return Response({
-                "message": f"{DELETED}"
-            }, status=status.HTTP_204_NO_CONTENT)
-        return response
-
-class PointVenteAction(UpdatePointVente,
-                       DeletePointVente,
-                       DetailPointVente):
-    """
-    All action to one store site
-    """
-
-#Views of articles
-class ArticleList(ListModelMixin, GenericAPIView):
-    """
-    List all articles
-    """
-    queryset = Article.objects.all()
-    serializer_class = ArticleSerializer
-
-    def get(self, request, *args,**kwargs):
-        return self.list(request, *args, **kwargs)
+    return CombineActionView

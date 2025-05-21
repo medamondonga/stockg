@@ -43,6 +43,13 @@ CHOICES_COULEUR = [
     ('bordeaux', 'bordeaux'),
     ('or', 'or')
 ]
+POINTURES = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', 
+            '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', 
+            '24', '25', '26', '27', '28', '29', '30', '31', '32', '33', '34', 
+            '35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45', 
+            '46', '47', '48', '49', '50']
+TAILLES_VETEMENTS = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', '4XL', '5XL', '6XL', '7XL', '8XL']
+TAILLES_SACS = ['Petit', 'Moyen', 'Grand','Compact', 'Standard', 'Sport']
 
 class Boutique(models.Model):
     """
@@ -65,9 +72,18 @@ class PointDeVente(models.Model):
     nom_point_de_vente = models.CharField(max_length=250)
     adresse = models.TextField()
     telephone = models.CharField(max_length=20)
-    gerant = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, related_name="gerant")
-    vendeur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, related_name="vendeur")
-
+    gerant = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, 
+                               null=True, blank=True, related_name="gerant", unique=True)
+    vendeur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+                                null=True, blank=True, related_name="vendeur", unique=True)
+    
+    def definir_vendeur(self, vendeur):
+        if not self.vendeur:
+            self.vendeur = vendeur
+            self.save()
+            return True
+        return False
+    
     def __str__(self):
         return f"{self.nom_point_de_vente}"
     
@@ -96,11 +112,11 @@ class Categorie(models.Model):
         to retrieve the sizes
         """
         if self.type_categorie == 'chaussures':
-            return ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31', '32', '33', '34', '35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46', '47', '48', '49', '50']
+            return POINTURES
         elif self.type_categorie == "vetements":
-            return ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', '4XL', '5XL', '6XL', '7XL', '8XL']
+            return TAILLES_VETEMENTS
         elif self.type_categorie == "sacs":
-            return ['Petit', 'Moyen', 'Grand','Compact', 'Standard', 'Sport']
+            return TAILLES_SACS
         else:
             return "Autre"
     
@@ -117,7 +133,8 @@ class Article(models.Model):
     prix_vente_unitaire = models.DecimalField(max_digits=10, decimal_places=2)
     quantite_en_stock = models.IntegerField()
     couleur = models.CharField(max_length=255, choices=CHOICES_COULEUR, null=True)
-    Categorie = models.ForeignKey(Categorie, on_delete=models.CASCADE)
+    categorie = models.ForeignKey(Categorie, on_delete=models.CASCADE)
+    point_de_vente = models.ForeignKey(PointDeVente, on_delete=models.CASCADE, default=None, null=True)
 
     def __str__(self):
         return f"{self.nom_article}"
@@ -128,6 +145,7 @@ class Vente(models.Model):
     client = models.ForeignKey(Client, on_delete=models.CASCADE)
     prix_total_vente = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     vendeur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    point_de_vente = models.ForeignKey(PointDeVente, on_delete=models.CASCADE, default=None, null=True)
 
     def __str__(self):
         return f"{self.date_vente} - {self.prix_total_vente} - {self.client}"

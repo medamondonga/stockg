@@ -104,7 +104,7 @@ class Categorie(models.Model):
     """
     categorie models
     """
-    nom_categorie = models.CharField(max_length=255, null=True, blank=True)
+    nom_categorie = models.CharField(max_length=255)
     type_categorie = models.CharField(max_length=255, choices=CHOICES_TYPE, default="autre")
     
     def get_taille(self):
@@ -134,6 +134,7 @@ class Article(models.Model):
     quantite_en_stock = models.IntegerField()
     couleur = models.CharField(max_length=255, choices=CHOICES_COULEUR, null=True)
     categorie = models.ForeignKey(Categorie, on_delete=models.CASCADE)
+    taille = models.CharField(max_length=50, null=True, blank=True)
     point_de_vente = models.ForeignKey(PointDeVente, on_delete=models.CASCADE, default=None, null=True)
 
     def __str__(self):
@@ -157,7 +158,7 @@ class VenteItem(models.Model):
     vente = models.ForeignKey(Vente, on_delete=models.CASCADE, related_name='vente_items')
     article = models.ForeignKey(Article, on_delete=models.CASCADE)
     quantite = models.IntegerField()
-    prix_unitaire_recu = models.DecimalField(max_digits=10, decimal_places=2)
+    prix_unitaire_recu = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     remise = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     perte = models.DecimalField(max_digits=5, decimal_places=2, default=0)
 

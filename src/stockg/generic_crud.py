@@ -3,6 +3,7 @@ The mixins file of stock app
 """
 from rest_framework import status
 from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
 from rest_framework.mixins import (ListModelMixin, CreateModelMixin,
                                    UpdateModelMixin, RetrieveModelMixin,
                                    DestroyModelMixin)
@@ -24,6 +25,7 @@ def create_customized(model, serializer):
         """
         queryset = model.objects.all()
         serializer_class = serializer
+        permission_classes = [AllowAny]
 
         def post(self, request, *args,**kwargs):
             """

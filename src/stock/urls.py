@@ -6,9 +6,10 @@ from stockg.generic_crud import (create_customized,
                      list_customized,
                      detail_update_delete_customized)
 from .models import (Boutique, PointDeVente, Article,
-                     Client, Categorie)
+                     Client, Categorie, Vente, VenteItem)
 from .serializers import (BoutiqueSerializer, PointDeVenteSerializer, ArticleSerializer,
-                          CategorieSerializer, CustomerSerializer)
+                          CategorieSerializer, CustomerSerializer, ArticleListSerializer,
+                          ClientSerializer, VenteItemSerializer, VenteSerializer, VenteListSerializer)
 
 urlpatterns = [
     #endpoints for store
@@ -38,7 +39,7 @@ urlpatterns = [
          create_customized(Article, ArticleSerializer).as_view(),
          name="New-article"),
      path("articles/",
-         list_customized(Article, ArticleSerializer).as_view(),
+         list_customized(Article, ArticleListSerializer).as_view(),
          name="list-article"),
      path("article/<int:pk>/",
           detail_update_delete_customized(Article, ArticleSerializer).as_view(),
@@ -65,4 +66,30 @@ urlpatterns = [
      path("categorie/<int:pk>/",
           detail_update_delete_customized(Categorie, CategorieSerializer).as_view(),
           name="action-categorie"),
+    path("client/new/", create_customized(Client, ClientSerializer).as_view(),
+         name="Creer-client"),
+    path("clients/", list_customized(Client, ClientSerializer).as_view(),
+         name="Liste-Client"),
+     
+     path("vente/new/",
+          create_customized(Vente, VenteSerializer).as_view(),
+          name='creer-vente'),
+     path("vente/<int:pk>/",
+          detail_update_delete_customized(Vente, VenteSerializer).as_view(),
+          name='creer-vente'),
+     path("ventes/list/",
+          list_customized(Vente, VenteListSerializer).as_view(),
+          name='vente-article'),
+
+
+
+     path("venteitem/new/",
+          create_customized(VenteItem, VenteItemSerializer).as_view(),
+          name='creer-vente'),
+     path("venteitem/<int:pk>/",
+          detail_update_delete_customized(VenteItem, VenteItemSerializer).as_view(),
+          name='creer-vente'),
+     path("venteitem/list/",
+          list_customized(VenteItem, VenteItemSerializer).as_view(),
+          name='vente-article'),
 ]

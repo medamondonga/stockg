@@ -129,8 +129,8 @@ class Article(models.Model):
     """
     nom_article = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
-    prix_achat_unitaire = models.DecimalField(max_digits=10,decimal_places=2)
-    prix_vente_unitaire = models.DecimalField(max_digits=10, decimal_places=2)
+    prix_achat_unitaire = models.IntegerField()
+    prix_vente_unitaire = models.IntegerField()
     quantite_en_stock = models.IntegerField()
     couleur = models.CharField(max_length=255, choices=CHOICES_COULEUR, null=True)
     categorie = models.ForeignKey(Categorie, on_delete=models.CASCADE)
@@ -144,7 +144,7 @@ class Article(models.Model):
 class Vente(models.Model):
     date_vente = models.DateField(auto_now_add=True)
     client = models.ForeignKey(Client, on_delete=models.CASCADE)
-    prix_total_vente = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    prix_total_vente = models.IntegerField(null=True, blank=True)
     vendeur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     point_de_vente = models.ForeignKey(PointDeVente, on_delete=models.CASCADE, default=None, null=True)
 
@@ -158,9 +158,12 @@ class VenteItem(models.Model):
     vente = models.ForeignKey(Vente, on_delete=models.CASCADE, related_name='vente_items')
     article = models.ForeignKey(Article, on_delete=models.CASCADE)
     quantite = models.IntegerField()
-    prix_unitaire_recu = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    remise = models.DecimalField(max_digits=5, decimal_places=2, default=0)
-    perte = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    prix_unitaire_recu = models.IntegerField(default=0)
+    remise = models.IntegerField(default=0)
+    perte = models.IntegerField(default=0)
+    benefice = models.IntegerField(default=0)
+    total = models.IntegerField()
+
 
 class Facture(models.Model):
     """

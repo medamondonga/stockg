@@ -1,7 +1,7 @@
 """
 The serializers file of stock app
 """
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from django.conf import settings
 from rest_framework import serializers
 from accounts.serializers import UserSerializer
@@ -67,6 +67,7 @@ class ClientSerializer(serializers.ModelSerializer):
 
 class VenteItemSerializer(serializers.ModelSerializer):
     article = serializers.PrimaryKeyRelatedField(queryset=Article.objects.all())
+
     class Meta:
         model = VenteItem
         fields = [
@@ -76,10 +77,14 @@ class VenteItemSerializer(serializers.ModelSerializer):
             'remise',
             'perte',
         ]
+        read_only_fields = ["total"]
+
+
 class VenteItemListSerializer(serializers.ModelSerializer):
     class Meta:
         model = VenteItem
         fields = "__all__"
+
 
 class VenteSerializer(serializers.ModelSerializer):
     articles = VenteItemSerializer(many=True, source="vente_items")
@@ -98,42 +103,56 @@ class VenteSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'date_vente', 'prix_total_vente']
 
     def create(self, validated_data):
-        articles_data = validated_data.pop("vente_items")
-        vente = Vente.objects.create(**validated_data)
-        total_vente = Decimal("0.00")
+        ventes_data = validated_data.pop("vente_items")
+        total_vente = 0
 
-        for item_data in articles_data:
-            quantite = int(item_data['quantite'])
+        # Vérifie le stock avant de créer la vente
+        for vente_data in ventes_data:
+            article = vente_data['article']
+            quantite = vente_data['quantite']
+            if article.quantite_en_stock < quantite:
+                raise serializers.ValidationError(
+                    f"Stock insuffisant pour l'article '{article.nom_article}'. "
+                    f"Disponible : {article.quantite_en_stock}, demandé : {quantite}."
+                )
+            total_vente += vente_data['prix_unitaire_recu'] * quantite
 
-            try:
-                prix_unitaire = Decimal(str(item_data['prix_unitaire_recu']))
-                remise = Decimal(str(item_data.get('remise', 0)))
-            except (InvalidOperation, ValueError):
-                raise serializers.ValidationError("Prix ou remise invalide.")
+        # Crée la vente maintenant que tout est validé
+        vente = Vente.objects.create(prix_total_vente=total_vente, **validated_data)
 
-            article = item_data['article']
+        # Crée les vente_items et met à jour le stock
+        for vente_data in ventes_data:
+            article = vente_data['article']
+            quantite = vente_data['quantite']
+            prix_recu = vente_data['prix_unitaire_recu']
+            remise = vente_data.get('remise', 0)
+            perte = 0
 
-            try:
-                prix_achat = Decimal(str(article.prix_achat_unitaire))
-            except (InvalidOperation, ValueError, AttributeError):
-                raise serializers.ValidationError("Prix d'achat de l'article invalide.")
+            total_item = prix_recu * quantite
+            benefice_item = (prix_recu - article.prix_achat_unitaire) * quantite
+            if benefice_item < 0:
+                perte = abs(benefice_item)
+                benefice_item = 0
 
-            perte_calculee = prix_unitaire - prix_achat
-            total = (prix_unitaire * quantite) - remise
-            total_vente += total
 
             VenteItem.objects.create(
                 vente=vente,
                 article=article,
                 quantite=quantite,
-                prix_unitaire_recu=prix_unitaire,
+                prix_unitaire_recu=prix_recu,
                 remise=remise,
-                perte=perte_calculee
+                perte=perte,
+                total=total_item,
+                benefice=benefice_item
             )
 
-        vente.prix_total_vente = total_vente
-        vente.save()
+            # Mise à jour du stock
+            article.quantite_en_stock -= quantite
+            article.save()
+
         return vente
+
+
     
 class VenteListSerializer(serializers.ModelSerializer):
     client = serializers.CharField(source='client.nom_client', read_only=True)

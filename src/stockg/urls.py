@@ -22,5 +22,4 @@ urlpatterns = [
     path("accounts/", include("accounts.urls"), name="accounts"),
     path("stock/", include("stock.urls"), name="stock-urls"),
     path('', include('dj_rest_auth.urls')),
-    path("users/", include("user.urls"), name="User-app"),
 ]

@@ -9,7 +9,7 @@ from .models import (Article, Boutique, PointDeVente,
                      Client, Categorie, Vente, VenteItem,
                      Depense)
 User = settings.AUTH_USER_MODEL
-#base serializers
+
 class ArticleListSerializer(serializers.ModelSerializer):
     categorie = serializers.CharField(source='categorie.nom_categorie', read_only=True)
     point_de_vente = serializers.CharField(source='point_de_vente.nom_point_de_vente', read_only=True)
@@ -65,6 +65,16 @@ class ClientSerializer(serializers.ModelSerializer):
         model = Client
         fields = "__all__"
 
+class ClientListSerializer(serializers.ModelSerializer):
+    nom_complet = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Client
+        fields = "__all__"
+
+    def get_nom_complet(self, obj):
+        return f"{obj.nom} - {obj.post_nom}"
+
 class VenteItemSerializer(serializers.ModelSerializer):
     article = serializers.PrimaryKeyRelatedField(queryset=Article.objects.all())
 
@@ -78,16 +88,33 @@ class VenteItemSerializer(serializers.ModelSerializer):
             'perte',
         ]
         read_only_fields = ["total"]
+    
+class VenteItemDetailSerializer(serializers.ModelSerializer):
+    article = serializers.StringRelatedField(read_only=True)
+    taille = serializers.CharField(source='article.taille', read_only=True)
+    prix_vente_unitaire = serializers.DecimalField(source='article.prix_vente_unitaire', read_only=True, max_digits=10, decimal_places=2)
 
+    class Meta:
+        model = VenteItem
+        fields = [
+            'article',
+
+            'taille',
+            'prix_vente_unitaire',
+            'quantite',
+            'prix_unitaire_recu',
+            'remise',
+            'perte',
+        ]
 
 class VenteItemListSerializer(serializers.ModelSerializer):
     class Meta:
         model = VenteItem
         fields = "__all__"
 
-
 class VenteSerializer(serializers.ModelSerializer):
     articles = VenteItemSerializer(many=True, source="vente_items")
+
 
     class Meta:
         model = Vente
@@ -104,6 +131,7 @@ class VenteSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         ventes_data = validated_data.pop("vente_items")
+        client = validated_data['client']
         total_vente = 0
 
         # Vérifie le stock avant de créer la vente
@@ -152,18 +180,21 @@ class VenteSerializer(serializers.ModelSerializer):
 
         return vente
 
-
-    
 class VenteListSerializer(serializers.ModelSerializer):
-    client = serializers.CharField(source='client.nom_client', read_only=True)
+    client = serializers.StringRelatedField()
     class Meta:
         model = Vente
         fields = "__all__"
-
 
 class DepensesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Depense
         fields = "__all__"
 
- 
+class DepenseListSerializer(serializers.ModelSerializer):
+    point_de_vente = serializers.CharField(source='point_de_vente.nom_point_de_vente')
+    class Meta:
+        model = Depense
+        fields = "__all__"
+        read_only_fields = ['date_depense']
+

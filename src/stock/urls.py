@@ -6,11 +6,13 @@ from stockg.generic_crud import (create_customized,
                      list_customized,
                      detail_update_delete_customized)
 from .models import (Boutique, PointDeVente, Article,
-                     Client, Categorie, Vente, VenteItem)
+                     Client, Categorie, Vente, VenteItem,
+                     Depense)
 from .serializers import (BoutiqueSerializer, PointDeVenteSerializer, ArticleSerializer,
                           CategorieSerializer, CustomerSerializer, ArticleListSerializer,
-                          ClientSerializer, VenteItemSerializer, VenteSerializer, VenteListSerializer)
-
+                          ClientSerializer, VenteItemSerializer, VenteSerializer, VenteListSerializer,
+                          DepensesSerializer, DepenseListSerializer)
+from .views import VenteItemByVenteView, produits_les_plus_vendus, statistiques_dashboard
 urlpatterns = [
     #endpoints for store
      path("boutique/new/",
@@ -66,9 +68,12 @@ urlpatterns = [
      path("categorie/<int:pk>/",
           detail_update_delete_customized(Categorie, CategorieSerializer).as_view(),
           name="action-categorie"),
-    path("client/new/", create_customized(Client, ClientSerializer).as_view(),
+    
+     path("client/new/",
+          create_customized(Client, ClientSerializer).as_view(),
          name="Creer-client"),
-    path("clients/", list_customized(Client, ClientSerializer).as_view(),
+     path("clients/",
+          list_customized(Client, ClientSerializer).as_view(),
          name="Liste-Client"),
      
      path("vente/new/",
@@ -81,15 +86,32 @@ urlpatterns = [
           list_customized(Vente, VenteListSerializer).as_view(),
           name='vente-article'),
 
-
-
      path("venteitem/new/",
           create_customized(VenteItem, VenteItemSerializer).as_view(),
           name='creer-vente'),
      path("venteitem/<int:pk>/",
           detail_update_delete_customized(VenteItem, VenteItemSerializer).as_view(),
           name='creer-vente'),
+     path("venteitems/",
+          VenteItemByVenteView.as_view(), name="venteitems-par-vente"),
      path("venteitem/list/",
           list_customized(VenteItem, VenteItemSerializer).as_view(),
           name='vente-article'),
+
+     path("depense/new/",
+          create_customized(Depense, DepensesSerializer).as_view(),
+          name='creer_depense'),
+     path("depenses/list/",
+          list_customized(Depense, DepenseListSerializer).as_view(),
+          name='liste-depense'
+     ),
+     path("depense/<int:pk>/",
+          detail_update_delete_customized(Depense, DepensesSerializer).as_view(),
+          name="action-depense"),
+
+     path("ventes/top/",
+          produits_les_plus_vendus,
+          name='top-ventes'),
+     path('stats/', statistiques_dashboard),
+
 ]

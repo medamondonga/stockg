@@ -145,7 +145,7 @@ class Vente(models.Model):
     date_vente = models.DateField(auto_now_add=True)
     client = models.ForeignKey(Client, on_delete=models.CASCADE)
     prix_total_vente = models.IntegerField(null=True, blank=True)
-    vendeur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    vendeur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
     point_de_vente = models.ForeignKey(PointDeVente, on_delete=models.CASCADE, default=None, null=True)
 
     def __str__(self):
@@ -165,40 +165,7 @@ class VenteItem(models.Model):
     total = models.IntegerField()
 
 
-class Facture(models.Model):
-    """
-    Model of facture
-    """
-    date = models.DateField(auto_now_add=True)
-    montant_HT = models.DecimalField(max_digits=10, decimal_places=2)
-    montant_TTC = models.DecimalField(max_digits=10, decimal_places=2)
-    vente = models.ForeignKey(Vente, on_delete=models.CASCADE)
 
-class Transfert(models.Model):
-    """
-    Model of transfert
-    """
-    date_transfert = models.DateTimeField(auto_now_add=True)
-    point_source = models.ForeignKey(PointDeVente, on_delete=models.CASCADE, related_name='transferts_sortants')
-    point_destination = models.ForeignKey(PointDeVente, on_delete=models.CASCADE, related_name='transferts_entrants')
-    code = models.CharField(max_length=20, unique=True, blank=True)
-    statut_transfert = models.CharField(max_length=50, choices=CHOICES_TRANSFERT, default="pending")
-
-    def save(self, *args, **kwargs):
-        if not self.code:
-            self.code = 'TRF'+''.join(random.choices(string.digits, k=7))
-            super().save(*args, **kwargs)
-
-    def __str__(self):
-        return f"{self.date_transfert} - {self.point_source} - {self.point_destination} - {self.statut_transfert}"
-    
-class TransferItem(models.Model):
-    """
-    Model of tranfert items
-    """
-    transfert = models.ForeignKey(Transfert, on_delete=models.CASCADE, related_name='items')
-    article = models.ForeignKey(Article, on_delete=models.CASCADE)
-    quantite = models.IntegerField()
 
 class Depense(models.Model):
     """
@@ -206,4 +173,5 @@ class Depense(models.Model):
     """
     point_de_vente = models.ForeignKey(PointDeVente, on_delete=models.CASCADE)
     motif_depense = models.CharField(max_length=100)
-    montant = models.DecimalField(max_digits=10, decimal_places=2)
+    montant = models.IntegerField()
+    date_depense = models.DateField(auto_now_add=True)

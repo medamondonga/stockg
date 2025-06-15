@@ -1,7 +1,8 @@
 """
 url file of stock app
 """
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 from stockg.generic_crud import (create_customized,
                      list_customized,
                      detail_update_delete_customized)
@@ -12,12 +13,16 @@ from .serializers import (BoutiqueSerializer, PointDeVenteSerializer, ArticleSer
                           CategorieSerializer, CustomerSerializer, ArticleListSerializer,
                           ClientSerializer, VenteItemSerializer, VenteSerializer, VenteListSerializer,
                           DepensesSerializer, DepenseListSerializer)
-from .views import VenteItemByVenteView, produits_les_plus_vendus, statistiques_dashboard
+from .views import (VenteItemByVenteView, produits_les_plus_vendus,
+                    statistiques_dashboard, PointDeVenteViewSet,
+                    BoutiqueViewSet)
+
+router = DefaultRouter()
+router.register(r'pointvente', PointDeVenteViewSet, basename='pointvente')
+router.register(r'boutique', BoutiqueViewSet, basename='boutique')
+
 urlpatterns = [
     #endpoints for store
-     path("boutique/new/",
-         create_customized(Boutique, BoutiqueSerializer).as_view(),
-         name="creation-boutique"),
      path("boutiques/",
          list_customized(Boutique, BoutiqueSerializer).as_view(),
          name="list_boutiques"),
@@ -26,9 +31,7 @@ urlpatterns = [
          name="action-boutique"),
 
     #endpoints for point de vente
-     path("pointvente/new/",
-         create_customized(PointDeVente, PointDeVenteSerializer).as_view(),
-         name="creation-point-vente"),
+      path('', include(router.urls)),
      path("pointventes/",
          list_customized(PointDeVente, PointDeVenteSerializer).as_view(),
          name="liste_point_de_vente"),
@@ -75,6 +78,9 @@ urlpatterns = [
      path("clients/",
           list_customized(Client, ClientSerializer).as_view(),
          name="Liste-Client"),
+     path("client/<int:pk>/",
+          detail_update_delete_customized(Client, ClientSerializer).as_view(),
+          name='action-client'),
      
      path("vente/new/",
           create_customized(Vente, VenteSerializer).as_view(),
@@ -112,6 +118,8 @@ urlpatterns = [
      path("ventes/top/",
           produits_les_plus_vendus,
           name='top-ventes'),
-     path('stats/', statistiques_dashboard),
+     path('stats/',
+          statistiques_dashboard, 
+          name="stat-vente"),
 
 ]

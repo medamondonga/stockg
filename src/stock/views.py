@@ -1,12 +1,40 @@
 from rest_framework.generics import ListAPIView
-from .models import VenteItem, Article, Depense, Vente
-from .serializers import VenteItemDetailSerializer
+from .models import VenteItem, Article, Depense, Vente, PointDeVente, Boutique
+from .serializers import VenteItemDetailSerializer, PointDeVenteSerializer, BoutiqueSerializer
 from django.db.models import Sum, Count
 from django.utils import timezone
 from datetime import timedelta
+from rest_framework import serializers, viewsets
 
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
+
+
+class PointDeVenteViewSet(viewsets.ModelViewSet):
+    queryset = PointDeVente.objects.all()
+    serializer_class = PointDeVenteSerializer
+
+    def perform_create(self, serializer):
+        boutique_id = self.request.data.get("boutique")
+        try:
+            boutique = Boutique.objects.get(id=boutique_id, proprietaire=self.request.user)
+            serializer.save(gerant=self.request.user, boutique=boutique)
+        except Boutique.DoesNotExist:
+            raise serializers.ValidationError("Boutique non trouvée ou accès interdit.")
+
+class BoutiqueViewSet(viewsets.ModelViewSet):
+    queryset = Boutique.objects.all()
+    serializer_class = BoutiqueSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(proprietaire=self.request.user)
+
+
+
+
+
+
+
 
 class VenteItemByVenteView(ListAPIView):
     serializer_class = VenteItemDetailSerializer

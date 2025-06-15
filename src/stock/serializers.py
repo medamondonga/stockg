@@ -43,7 +43,9 @@ class ArticleSerializer(serializers.ModelSerializer):
 class BoutiqueSerializer(serializers.ModelSerializer):
     class Meta:
         model = Boutique
-        fields = "__all__"
+        fields = '__all__'
+        read_only_fields = ['proprietaire']
+
 
 class PointDeVenteSerializer(serializers.ModelSerializer):
     class Meta:

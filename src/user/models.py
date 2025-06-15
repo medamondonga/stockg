@@ -15,7 +15,6 @@ STATUT_CHOICES_ABONNEMENTS = [
     ("not_active", "not_active"),
 ]
 
-   
 class Offre(models.Model):
     """
     the offre class

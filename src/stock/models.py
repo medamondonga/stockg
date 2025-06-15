@@ -73,7 +73,7 @@ class PointDeVente(models.Model):
     adresse = models.TextField()
     telephone = models.CharField(max_length=20)
     gerant = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, 
-                               null=True, blank=True, related_name="gerant", unique=True)
+                               null=True, blank=True, related_name="gerant")
     vendeur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
                                 null=True, blank=True, related_name="vendeur", unique=True)
     

@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -38,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework', 'dj_rest_auth', 'rest_framework.authtoken',
-    'corsheaders', 'stock', 'accounts'
+    'corsheaders', 'stock', 'accounts', 'drf_yasg','rest_framework_simplejwt',
 ]
 
 MIDDLEWARE = [
@@ -128,9 +129,28 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 """
  Thinks i've had
 """
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ]
+}
 AUTH_USER_MODEL = 'accounts.User'
-REST_USE_JWT = True
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=150),   # Token valide 1h
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),      # Refresh valide 7 jours
+}
+REST_USE_JWT = True
+
+
 

@@ -1,13 +1,7 @@
 from rest_framework import serializers
+from .models import Abonnement
 
-from .models import Invitation
-
-class InvitationSerializer(serializers.ModelSerializer):
+class AbonnementSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Invitation
-        fields = ['email_invite', 'point_de_vente']
-
-
-
-               
-
+        model = Abonnement
+        fields = '__all__'

@@ -4,7 +4,9 @@ stock models
 import random
 import string
 from django.db import models
-from django.conf import settings
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 
 CHOICES_ETAT_BOUTIQUE=[
@@ -19,6 +21,7 @@ CHOICES_TYPE = [
     ("chaussures", "Chaussures"),
     ("vetements", "Vetements"),
     ("sacs", "Sacs"),
+    ("pas_definit", "Pas defini"),
     ("autre", "Autre")
 ]
 CHOICES_TRANSFERT = [
@@ -55,7 +58,7 @@ class Boutique(models.Model):
     """
     Store class
     """
-    proprietaire = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    proprietaire = models.ForeignKey(User, on_delete=models.CASCADE)
     nom_boutique = models.CharField(max_length=250)
     adresse = models.TextField()
     date_cretation = models.DateTimeField(auto_now_add=True)
@@ -72,9 +75,9 @@ class PointDeVente(models.Model):
     nom_point_de_vente = models.CharField(max_length=250)
     adresse = models.TextField()
     telephone = models.CharField(max_length=20)
-    gerant = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, 
+    gerant = models.ForeignKey(User, on_delete=models.CASCADE, 
                                null=True, blank=True, related_name="gerant")
-    vendeur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+    vendeur = models.ForeignKey(User, on_delete=models.CASCADE,
                                 null=True, blank=True, related_name="vendeur", unique=True)
     
     def definir_vendeur(self, vendeur):
@@ -91,6 +94,7 @@ class Client(models.Model):
     """
     Class of client
     """
+    proprietaire = models.ForeignKey(User, on_delete=models.CASCADE, related_name='client')
     nom_client = models.CharField(max_length=255)
     prenom_client = models.CharField(max_length=255)
     sexe = models.CharField(max_length=20, choices=CHOICES_SEXE, null=True, blank=True)
@@ -105,7 +109,9 @@ class Categorie(models.Model):
     categorie models
     """
     nom_categorie = models.CharField(max_length=255)
-    type_categorie = models.CharField(max_length=255, choices=CHOICES_TYPE, default="autre")
+    type_categorie = models.CharField(max_length=255, choices=CHOICES_TYPE,null=True, blank=True)
+    proprietaire = models.ForeignKey(User, on_delete=models.CASCADE, related_name='proprio_categorie')
+
     
     def get_taille(self):
         """
@@ -136,16 +142,19 @@ class Article(models.Model):
     categorie = models.ForeignKey(Categorie, on_delete=models.CASCADE)
     taille = models.CharField(max_length=50, null=True, blank=True)
     point_de_vente = models.ForeignKey(PointDeVente, on_delete=models.CASCADE, default=None, null=True)
+    proprietaire = models.ForeignKey(User, on_delete=models.CASCADE, related_name='article_proprio')
+
 
     def __str__(self):
         return f"{self.nom_article}"
     
 
 class Vente(models.Model):
+    proprietaire = models.ForeignKey(User, on_delete=models.CASCADE, related_name='proprio_vente')
     date_vente = models.DateField(auto_now_add=True)
     client = models.ForeignKey(Client, on_delete=models.CASCADE)
     prix_total_vente = models.IntegerField(null=True, blank=True)
-    vendeur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
+    vendeur = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     point_de_vente = models.ForeignKey(PointDeVente, on_delete=models.CASCADE, default=None, null=True)
 
     def __str__(self):
@@ -163,6 +172,7 @@ class VenteItem(models.Model):
     perte = models.IntegerField(default=0)
     benefice = models.IntegerField(default=0)
     total = models.IntegerField()
+    
 
 
 
@@ -171,7 +181,9 @@ class Depense(models.Model):
     """
     Depense models
     """
-    point_de_vente = models.ForeignKey(PointDeVente, on_delete=models.CASCADE)
+    point_de_vente = models.ForeignKey(PointDeVente, on_delete=models.CASCADE, null=True, blank=True)
     motif_depense = models.CharField(max_length=100)
     montant = models.IntegerField()
     date_depense = models.DateField(auto_now_add=True)
+    proprietaire = models.ForeignKey(User, on_delete=models.CASCADE, related_name='proprio_depense')
+

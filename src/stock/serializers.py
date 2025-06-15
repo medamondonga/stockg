@@ -16,11 +16,13 @@ class ArticleListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
         fields = "__all__"
+        read_only_fields = ['proprietaire']
 
 class ArticleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
         fields = '__all__'
+        read_only_fields = ['proprietaire']
 
     def to_representation(self, instance):
         rep = super().to_representation(instance)
@@ -61,11 +63,13 @@ class CategorieSerializer(serializers.ModelSerializer):
     class Meta:
         model = Categorie
         fields = "__all__"
+        read_only_fields = ['proprietaire']
 
 class ClientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Client
         fields = "__all__"
+        read_only_fields = ['proprietaire']
 
 class ClientListSerializer(serializers.ModelSerializer):
     nom_complet = serializers.SerializerMethodField()
@@ -129,7 +133,7 @@ class VenteSerializer(serializers.ModelSerializer):
             'prix_total_vente',
             'articles'
         ]
-        read_only_fields = ['id', 'date_vente', 'prix_total_vente']
+        read_only_fields = ['id', 'date_vente', 'prix_total_vente', 'propriataire', 'vendeur']
 
     def create(self, validated_data):
         ventes_data = validated_data.pop("vente_items")
@@ -192,9 +196,9 @@ class DepensesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Depense
         fields = "__all__"
+        read_only_fields = ['proprietaire']
 
 class DepenseListSerializer(serializers.ModelSerializer):
-    point_de_vente = serializers.CharField(source='point_de_vente.nom_point_de_vente')
     class Meta:
         model = Depense
         fields = "__all__"
